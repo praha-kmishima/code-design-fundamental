@@ -1,7 +1,7 @@
 class item2 {
     name: string;
     price: number;
-    rate: number;
+    rate: number; // priceに掛ける係数
 
     constructor(name: string, price: number, rate: number) {
         this.name = name;
@@ -14,6 +14,8 @@ class Cart2 {
     totalPrice(items: item2[]) {
         var total = 0;
         for (const item of items) {
+            // 変更点: 係数はitemが保持している
+            // ⇒ 条件が変わるたびに係数を変更する修正が不要になる
             total += item.price * item.rate;
         }
         return total;

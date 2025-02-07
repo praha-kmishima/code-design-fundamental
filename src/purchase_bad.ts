@@ -8,6 +8,7 @@ class Cart {
         var total = 0;
         for (const item of items) {
             var rate = 1;
+            // 商品に対する係数を変更するたびにコード修正が必要・・・
             switch (item.name) {
                 case 'apple':
                     rate = 0.9;
