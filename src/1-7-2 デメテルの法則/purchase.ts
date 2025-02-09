@@ -1,4 +1,4 @@
-class Purchase {
+class PurchaseX {
     private _userId: string
     private _productId: string
     constructor(userId: string, productId: string) {
