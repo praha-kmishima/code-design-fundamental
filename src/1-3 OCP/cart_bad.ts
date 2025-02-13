@@ -4,11 +4,21 @@ type Item = {
 }
 
 class Cart {
-    totalPrice(items: Item[]) {
+    items: Item[];
+
+    constructor() {
+        this.items = [];
+    }
+
+    addItem(item: Item) {
+        this.items.push(item);
+    }
+
+    totalPrice() {
         var total = 0;
-        for (const item of items) {
+        for (const item of this.items) {
             var rate = 1;
-            // 商品に対する係数を変更するたびにコード修正が必要・・・
+            // BAD: 商品に対する係数を変更するたびにコード修正が必要・・・
             switch (item.name) {
                 case 'apple':
                     rate = 0.9;
@@ -32,13 +42,11 @@ class Cart {
 
 // main
 const cart = new Cart();
-const items = [
-    { name: 'apple', price: 100 },
-    { name: 'banana', price: 200 },
-    { name: 'orange', price: 300 },
-    { name: 'pineapple', price: 400 },
-];
-console.log(cart.totalPrice(items));
+cart.addItem({ name: 'apple', price: 100 });
+cart.addItem({ name: 'banana', price: 200 });
+cart.addItem({ name: 'orange', price: 300 });
+cart.addItem({ name: 'pineapple', price: 400 });
+console.log(cart.totalPrice());
 
 
 
