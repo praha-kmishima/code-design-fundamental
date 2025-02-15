@@ -1,26 +1,65 @@
 interface Purchase {
-    userId: string
-    productId: string
-    transaction: {
-      succeeded: true
-      completedAt: Date
-    }
+  userId: string
+  productId: string
+  transaction: {
+    succeeded: true
+    completedAt: Date
   }
-  
-  interface PaymentRecordRepo {
-    getPurchasesBy: (userId: string) => Purchase[]
+}
+
+interface PaymentRecordRepo {
+  getPurchasesBy: (userId: string) => Purchase[]
+}
+
+// 基本となるSpecificationインターフェース
+interface PurchaseSpecification {
+  isSatisfiedBy(purchase: Purchase, existingPurchases: Purchase[]): boolean;
+}
+
+// 1年以内の購入制限のSpecification
+class YearlyPurchaseLimitSpecification implements PurchaseSpecification {
+  isSatisfiedBy(purchase: Purchase, existingPurchases: Purchase[]): boolean {
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    
+    return !existingPurchases.some(p => 
+      p.productId === purchase.productId && 
+      p.transaction.succeeded &&
+      p.transaction.completedAt >= oneYearAgo
+    );
   }
-  
-  class PurchaseService {
-    public constructor(private paymentRecordRepo: PaymentRecordRepo) {}
-  
-    public purchase(userId: string, productId: string) {
-      const allPurchases = this.paymentRecordRepo.getPurchasesBy(userId)
-      const pastPurchase = allPurchases.find((p) => p.productId === productId && p.transaction.succeeded)
-      if (pastPurchase) {
-        throw new Error('この商品はおひとりさま一品限定です！')
+}
+
+// カスタムエラー
+class PurchaseLimitError extends Error {
+  constructor(productId: string) {
+    super(`この商品（${productId}）は過去1年以内に購入済みです。おひとりさま一品限定となっております。`);
+    this.name = 'PurchaseLimitError';
+  }
+}
+
+class PurchaseService {
+  private purchaseSpecification: PurchaseSpecification;
+
+  public constructor(private paymentRecordRepo: PaymentRecordRepo) {
+    this.purchaseSpecification = new YearlyPurchaseLimitSpecification();
+  }
+
+  public purchase(userId: string, productId: string) {
+    const allPurchases = this.paymentRecordRepo.getPurchasesBy(userId);
+    const newPurchase: Purchase = {
+      userId,
+      productId,
+      transaction: {
+        succeeded: true,
+        completedAt: new Date()
       }
-  
-      // 購入手続きに進む
+    };
+
+    if (!this.purchaseSpecification.isSatisfiedBy(newPurchase, allPurchases)) {
+      throw new PurchaseLimitError(productId);
     }
+
+    // 購入手続きに進む
   }
+}
