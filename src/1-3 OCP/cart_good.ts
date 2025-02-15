@@ -1,4 +1,12 @@
-class item2 {
+type IGoodItem = {
+    name: string;
+    price: number;
+    rate: number;
+    // priceに係数を掛ける処理はここで管理するように変更
+    calcPrice: () => number;
+}
+
+class GoodItem implements IGoodItem {
     name: string;
     price: number;
     rate: number; 
@@ -9,24 +17,23 @@ class item2 {
         this.rate = rate;
     }
 
-    // priceに係数を掛ける処理はここで管理するように変更
     calcPrice() {
         return this.price * this.rate;
     }
 }
 
 class Cart2 {
-    items: item2[];
+    items: IGoodItem[];
 
     constructor() {
         this.items = [];
     }
 
-    addItem(item: item2) {
+    addItem(item: IGoodItem) {
         this.items.push(item);
     }
 
-    // Good: 係数を管理する必要がなくなり、修正に対して閉じられるようなった
+    // Good: OCP原則を満たすようになった
     totalPrice() {
         return this.items.reduce((sum, item) => sum + item.calcPrice(), 0);
     }
@@ -34,8 +41,8 @@ class Cart2 {
 
 // main
 const cart2 = new Cart2();
-cart2.addItem(new item2('apple', 100, 0.9));
-cart2.addItem(new item2('banana', 200, 0.8));
-cart2.addItem(new item2('orange', 300, 1.2));
-cart2.addItem(new item2('pineapple', 400, 1));
+cart2.addItem(new GoodItem('apple', 100, 0.9));
+cart2.addItem(new GoodItem('banana', 200, 0.8));
+cart2.addItem(new GoodItem('orange', 300, 1.2));
+cart2.addItem(new GoodItem('pineapple', 400, 1));
 console.log(cart2.totalPrice());
